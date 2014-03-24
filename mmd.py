@@ -84,7 +84,8 @@ class QuadraticTimeMMD:
 		for i in range(m):
 			for j in range(m, m + n):
 				third += self.kernel.item(i, j)
-		statistic = (m + n) * (first + second - third)
+		third /= m * n
+		statistic = (m + n) * (first + second - 2 * third)
 
 		if m == n:
 			statistic /= 2
@@ -111,7 +112,8 @@ class QuadraticTimeMMD:
 		for i in range(m):
 			for j in range(m, m + n):
 				third += self.kernel.item(i, j)
-		statistic = (m + n) * (first + second - third)
+		third /= m * n
+		statistic = (m + n) * (first + second - 2 * third)
 
 		if m == n:
 			statistic /= 2
