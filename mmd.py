@@ -17,6 +17,9 @@ import random
 import numpy as np
 from math import sqrt
 
+"""
+ generates 1 dimensional gaussian samples
+"""
 class GenerateSamples:
 	@staticmethod
 	def generate_gaussian(p, q, mu_p, mu_q, var_p, var_q):
@@ -24,10 +27,21 @@ class GenerateSamples:
 		samples_from_q = [random.gauss(mu_q, sqrt(var_p)) for j in range(q)]
 		return np.array(samples_from_p + samples_from_q)
 
+"""
+ class QuadraticTimeMMD that implements computation of unbiased statistic
+ MMD_u^2 and MMD_b^2 (See [1] for details). It also provides a method for
+ sampling null spectral distribution.
+
+ [1]: Gretton, A., Borgwardt, K. M., Rasch, M. J., Schoelkopf, B., & Smola, A. (2012).
+ A Kernel Two-Sample Test. Journal of Machine Learning Research, 13, 671-721.
+"""
 class QuadraticTimeMMD:
 	num_samples_p = 0
 	num_samples_q = 0
 	kernel = np.array([])
+	"""
+	initializes the kernel computed on appended samples
+	"""
 	def __init__(self, p, q, samples_from_p_q):
 		self.num_samples_p = p
 		self.num_samples_q = q
@@ -36,6 +50,10 @@ class QuadraticTimeMMD:
 #		print 'kernel computed'
 #		print self.kernel
 
+	"""
+	computes a radial basis function kernel on one dimensional data
+	provided data points are assumed to be appended
+	"""
 	@staticmethod
 	def rbf(x_y, width):
 #		print 'computing rbf between samples', x_y
@@ -43,6 +61,10 @@ class QuadraticTimeMMD:
 #		print 'pairwise_distance', pairwise_distance
 		return exp(-pairwise_distance ** 2 / width)
 
+	"""
+	computes MMD_u^2 estimate. The return value is (m+n)*MMD_u^2 in general
+	and m*MMD_u^2 when m and n are equal
+	"""
 	def compute_unbiased_statistic(self):
 		first = 0.0
 		m = self.num_samples_p
@@ -68,6 +90,10 @@ class QuadraticTimeMMD:
 			statistic /= 2
 		return statistic
 
+	"""
+	computes MMD_b^2 estimate. The return value is (m+n)*MMD_u^2 in general
+	and m*MMD_b^2 when m and n are equal
+	"""
 	def compute_biased_statistic(self):
 		first = 0.0
 		m = self.num_samples_p
@@ -91,6 +117,9 @@ class QuadraticTimeMMD:
 			statistic /= 2
 		return statistic
 
+	"""
+	estimates spectral approximation of null samples
+	"""
 	def sample_null_spectrum(self, num_samples, num_ev = 3, statistic = 'biased'):
 		centered = scale(self.kernel)
 #		print centered
@@ -116,7 +145,7 @@ class QuadraticTimeMMD:
 
 		if m == n:
 			null_samples = map(lambda x: x / 2, null_samples)
-		return null_samples
+		return np.array(null_samples)
 
 if __name__ == '__main__':
 	num_null_samples = 1000
