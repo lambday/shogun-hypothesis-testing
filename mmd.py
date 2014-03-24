@@ -152,22 +152,20 @@ class QuadraticTimeMMD:
 if __name__ == '__main__':
 	num_null_samples = 1000
 	estimates = [0] * num_null_samples
-	m = 10
-	n = 10
-	samples_h0 = GenerateSamples.generate_gaussian(m, n, 0, 0, 1, 1)
-	samples_h1 = GenerateSamples.generate_gaussian(m, n, 0, 0, 10, 1)
+	m = 50
+	n = 100
 
-	mmd = QuadraticTimeMMD(m, n, samples_h0)
 	for i in range(num_null_samples):
-		estimates[i] = mmd.sample_null_spectrum(1000).mean()
+		samples_h0 = GenerateSamples.generate_gaussian(m, n, 0, 0, 1, 1)
+		mmd = QuadraticTimeMMD(m, n, samples_h0)
+		estimates[i] = mmd.compute_unbiased_statistic()
+	plot.hist(estimates, 20, normed = 1, alpha = 0.5)
+
+	for i in range(num_null_samples):
+		samples_h1 = GenerateSamples.generate_gaussian(m, n, 0, 1, 1, 1)
+		mmd = QuadraticTimeMMD(m, n, samples_h1)
+		estimates[i] = mmd.compute_unbiased_statistic()
 	plot.hist(estimates, 50, normed = 1, alpha = 0.5)
 
-	mmd = QuadraticTimeMMD(m, n, samples_h1)
-	for i in range(num_null_samples):
-		estimates[i] = mmd.sample_null_spectrum(1000).mean()
-	plot.hist(estimates, 50, normed = 1, alpha = 0.5)
-
-	plot.legend(["H0", "H1"])
-#	plot.xlim([10, 40])
-#plot.ylim([0, 1])
+	plot.legend(["MMD^2_u under H0", "MMD^2_u under H1"])
 	plot.show()
